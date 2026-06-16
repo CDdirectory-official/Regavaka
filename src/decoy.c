@@ -1,0 +1,57 @@
+#include "../include/decoy.h"
+
+/* Global state tracker for the intrusion detection system */
+static int intruder_trapped = 0;
+
+/**
+ * @brief Initializes the Shadow Guard defense subsystem.
+ * Reset the intruder state to default.
+ */
+void init_shadow_guard() {
+    intruder_trapped = 0;
+}
+
+/**
+ * @brief Monitors system integrity by inspecting user input.
+ * If unauthorized privilege escalation is detected, the system routes 
+ * the user session into an isolated sandbox decoy environment.
+ * 
+ * @param input The raw command string from the shell buffer.
+ */
+void monitor_system_integrity(char* input) {
+    
+    /* 1. DETECTION PROTOCOL: Intercept unauthorized root access attempts */
+    if (strcmp(input, "sudo su") == 0 || strcmp(input, "admin") == 0) {
+        intruder_trapped = 1;
+        
+        /* Transmit high-priority alert logs via Serial UART Interface */
+        write_serial_string("\r\n[SECURITY ALERT] UNAUTHORIZED PRIVILEGE ESCALATION ATTEMPT DETECTED!\r\n");
+        write_serial_string("[SYSTEM] ROUTING ISOLATED SESSION TO DECOY ENVIROMENT...\r\n");
+        
+        /* Display a fake successful login prompt on the VGA screen */
+        draw_string("ACCESS GRANTED. STATUS: ROOT_ADMIN", 45, 150, 2); // Green text
+        draw_string("root@linenix_secure:/# ", 45, 165, 3);          // Cyan shell prompt
+        
+        buffer_index = 0;
+        return;
+    }
+
+    /* 2. SANDBOX ISOLATION: Intercepting and logging all post-breach activities */
+    if (intruder_trapped == 1) {
+        /* Silently log all malicious inputs via the host serial terminal */
+        write_serial_string("[MONITOR] Captured Malicious Telemetry: ");
+        write_serial_string(input);
+        write_serial_string("\r\n");
+
+        /* Simulate automated tracing and localization telemetry */
+        write_serial_string("[TRACEBACK] Resolving IP Address via network gateway...\r\n");
+        write_serial_string("[TRACEBACK] Intruder location coordinates isolated.\r\n");
+        write_serial_string("[TRACEBACK] Status: Forwarding forensics data to local authorities.\r\n");
+        
+        /* Render standard system loading text to hold the session */
+        draw_string("Processing system request... Please wait.", 45, 180, 4); // Yellow text
+        
+        buffer_index = 0;
+        return;
+    }
+}
